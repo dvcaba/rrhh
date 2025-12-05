@@ -7,6 +7,31 @@ Proyecto de ejemplo para generación, parsing y ranking de CVs contra JDs con ex
 - `smart-filtering-poc/`: código principal, UI Streamlit, CLI y tests.
 - `PLAN.md`: plan de trabajo.
 
+### Estructura detallada (smart-filtering-poc)
+
+- `config/default.yaml`: rutas de datos/outputs, modelo de embeddings, peso extra de skills.
+- `requirements.txt` / `pyproject.toml`: dependencias (incluye extras dev, ruff/black/pytest).
+- `app/ui_streamlit/app.py`: UI Streamlit; ranking, filtros, explicación y export CSV.
+- `src/smart_filtering/`
+  - `config.py`: carga YAML de config y resuelve rutas.
+  - `generator/`: datos sintéticos.
+    - `cv_generator.py`: genera CVs (ids, skills, experiencia, ubicación).
+    - `jd_generator.py`: genera JDs por rol (must/nice, pesos, ubicación).
+    - `run_generation.py`: escribe CVs en DOCX.
+    - `run_jd_generation.py`: escribe JDs en DOCX.
+  - `normalizer/skills_taxonomy.py`: catálogo de skills, sinónimos, helpers.
+  - `embedder/embed.py`: wrapper de SentenceTransformer; modo offline devuelve ceros.
+  - `parser/docx_parser.py`: parsea CV/JD DOCX → dict enriquecido con coords.
+  - `ranker/features.py`: similitud semántica, experiencia, cobertura must-have, distancia geográfica.
+  - `ranker/score.py`: pondera features según JD, aplica factores de cobertura/experiencia y skill_alignment.
+  - `explainer/explain.py`: texto de explicación/KO en castellano con desglose.
+  - `assessor/questions.py`: banco básico de preguntas por skill.
+  - `assessor/grade.py`: “grader” simplificado por keywords, produce score/100.
+  - `cli.py`: comandos generate-cv/generate-jd/rank.
+  - `__main__.py`: permite `python -m smart_filtering`.
+- `tests/`: pruebas básicas de parser y scoring.
+- `data/`: placeholder (`.gitkeep`); los datos generados en `data/raw`, `data/processed`, `data/outputs` están ignorados en git.
+
 ## Cómo arrancar la app (local)
 
 ```bash
