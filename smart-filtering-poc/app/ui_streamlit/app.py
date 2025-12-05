@@ -255,7 +255,7 @@ for cv in all_cvs:
             "cv_id": cv["id"],
             "name": cv["name"],
             "score": score_result["score"],
-            "ko_reason": "OK" if score_result["score"] > 0 else (score_result.get("reason") or "KO sin motivo"),
+            "ko_reason": score_result.get("ko_reason") or "OK",
             "experience_years_total": cv.get("experience_years_total", 0),
             "location_city": cv.get("location", {}).get("city", ""),
             "distance_km": score_result["features"].get("distance_to_jd_city_km"),
@@ -265,7 +265,7 @@ for cv in all_cvs:
     )
 
 if show_only_pass:
-    filtered_cvs = [cv for cv in scored_cvs if cv["score"] > 0]
+    filtered_cvs = [cv for cv in scored_cvs if cv["ko_reason"] == "OK"]
 else:
     filtered_cvs = scored_cvs
 
