@@ -37,8 +37,9 @@ def calculate_score(
     if features.get("meets_min_skill_years") == 0:
         ko_reasons.append("No cumple mínima experiencia por skill")
 
-    if features.get("location_match_score", 0.0) == 0.0 and jd.get("location_policy", {}).get("type") != "remote":
-        ko_reasons.append("Ubicación fuera de rango para un puesto no remoto")
+    loc_type = jd.get("location_policy", {}).get("type")
+    if loc_type == "on-site" and features.get("location_match_score", 0.0) == 0.0:
+        ko_reasons.append("Ubicación fuera de rango para un puesto on-site")
 
     if ko_reasons:
         return {

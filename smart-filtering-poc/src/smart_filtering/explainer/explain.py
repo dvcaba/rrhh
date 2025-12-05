@@ -35,8 +35,8 @@ def generate_explanation(cv: Dict[str, Any], jd: Dict[str, Any], score_result: D
                     missing_skill_exp.append(f"{skill} (mín. {min_years} años)")
             if missing_skill_exp:
                 explanation_parts.append(f"❌ **Rechazo por Experiencia Específica:** No cumple con la experiencia mínima requerida en: {', '.join(missing_skill_exp)}.")
-        if features.get("location_match_score", 0.0) == 0.0 and jd.get("location_policy", {}).get("type") != "remote":
-            explanation_parts.append(f"❌ **Rechazo por Ubicación:** El puesto es '{jd.get('location_policy', {}).get('type')}' en {jd.get('location_policy', {}).get('city')} (máx. {jd.get('location_policy', {}).get('max_km', 0)} km), y el candidato reside en {cv.get('location', {}).get('city')}.")
+        if jd.get("location_policy", {}).get("type") == "on-site" and features.get("location_match_score", 0.0) == 0.0:
+            explanation_parts.append(f"❌ **Rechazo por Ubicación:** El puesto es 'on-site' en {jd.get('location_policy', {}).get('city')} (máx. {jd.get('location_policy', {}).get('max_km', 0)} km), y el candidato reside en {cv.get('location', {}).get('city')}.")
         return "\n".join(explanation_parts)
 
     # --- Positive Matches and Gaps ---
