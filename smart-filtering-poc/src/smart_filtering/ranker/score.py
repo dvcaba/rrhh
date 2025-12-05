@@ -44,14 +44,6 @@ def calculate_score(
     if loc_type == "on-site" and features.get("location_match_score", 0.0) == 0.0:
         ko_reasons.append("Ubicación fuera de rango para un puesto on-site")
 
-    if ko_reasons:
-        return {
-            "score": 0.0,
-            "reason": "; ".join(ko_reasons),
-            "features": features,
-            "score_components": {},
-        }
-
     # --- Calculate Weighted Score ---
     weights = jd["weights"]
     
@@ -116,11 +108,18 @@ def calculate_score(
         total_score /= sum_of_weights
 
     total_score *= coverage_factor
+
+    # If KO, apply strong penalty but keep score info
+    ko_reason = "; ".join(ko_reasons) if ko_reasons else None
+    if ko_reason:
+        total_score *= 0.2
+
     total_score = max(0.0, min(1.0, total_score))
     
     return {
         "score": round(total_score, 4),
-        "reason": "Score calculated successfully",
+        "reason": ko_reason or "Score calculated successfully",
+        "ko_reason": ko_reason,
         "features": features,
         "score_components": score_components
     }
