@@ -1,0 +1,2 @@
+[console_scripts]
+smart-filtering = smart_filtering.cli:main

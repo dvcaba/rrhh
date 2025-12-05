@@ -1,0 +1,11 @@
+data:
+  cvs_dir: data/raw/cvs
+  jds_dir: data/raw/jds
+  processed_dir: data/processed
+  outputs_dir: data/outputs
+
+models:
+  embedding: paraphrase-multilingual-MiniLM-L12-v2
+
+ranking:
+  default_skill_weight_strength: 0.25

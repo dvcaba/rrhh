@@ -1,0 +1,14 @@
+.DS_Store
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.streamlit/
+
+# Project data outputs
+smart-filtering-poc/data/raw/
+smart-filtering-poc/data/processed/
+smart-filtering-poc/data/outputs/
+
+# Misc
+*.log

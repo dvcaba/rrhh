@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+
+# Environments
+.env
+.venv/
+.venv*/
+
+# Tools
+.ruff_cache/
+.idea/
+.vscode/
+
+# Streamlit
+.streamlit/
+
+# OS noise
+.DS_Store
+
+# Project data/output
+data/raw/
+data/processed/
+data/outputs/
+*.docx
+!data/.gitkeep
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/outputs/.gitkeep
