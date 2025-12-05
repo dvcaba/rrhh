@@ -66,11 +66,10 @@ def calculate_score(
             )
             skill_alignment = matched_weight / total_skill_weight
 
-    # Coverage factors to avoid hard knock-outs
+    # Cobertura: se usa solo como información, no penaliza. Cada skill suma, la que falta no resta.
     must_cov = features.get("must_have_coverage", 0.0)
     min_skill_cov = features.get("min_skill_years_coverage", 0.0)
-    coverage_factor = 0.2 + 0.5 * must_cov + 0.3 * min_skill_cov
-    coverage_factor = min(1.0, max(0.1, coverage_factor))
+    coverage_factor = 1.0
 
     # Experience factor to soften penalty for being slightly under the min
     exp_factor = 1.0
@@ -108,11 +107,7 @@ def calculate_score(
         total_score /= sum_of_weights
 
     total_score *= coverage_factor
-
-    # If KO, apply strong penalty but keep score info
     ko_reason = "; ".join(ko_reasons) if ko_reasons else None
-    if ko_reason:
-        total_score *= 0.2
 
     total_score = max(0.0, min(1.0, total_score))
     
