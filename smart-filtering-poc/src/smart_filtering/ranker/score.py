@@ -1,8 +1,11 @@
 # src/ranker/score.py
 
+import os
 from typing import Dict, Any, Optional
 from smart_filtering.ranker.features import extract_features
 from smart_filtering.normalizer.skills_taxonomy import get_canonical_skill
+
+EMBEDDER_MODE = os.getenv("SMART_FILTERING_EMBEDDER_MODE", "").lower()
 
 def normalize_feature(value: float, min_val: float, max_val: float) -> float:
     """Min-max normalization to scale a feature to [0, 1]."""
@@ -90,6 +93,11 @@ def calculate_score(
     w_location = weights.get("location", 0.0)
     w_education = weights.get("education", 0.0)
 
+    # In modo offline de embeddings, elimina peso semántico y reequilibra
+    if EMBEDDER_MODE == "offline":
+        w_skill_sem = 0.0
+        w_title_sem = 0.0
+
     # Calculate score components
     score_components = {
         "skill_semantic": features["skill_semantic_similarity"] * w_skill_sem,
@@ -100,9 +108,10 @@ def calculate_score(
         "must_have": must_cov * 0.1,  # small extra weight to reward coverage
         "skill_alignment": skill_alignment * skill_weight_strength,
     }
-    
+
     total_score = sum(score_components.values())
-    sum_of_weights = sum(weights.values()) + 0.1 + skill_weight_strength  # include must-have and custom skill bump
+    sum_weights_base = w_skill_sem + w_title_sem + w_experience + w_location + w_education
+    sum_of_weights = sum_weights_base + 0.1 + skill_weight_strength  # include must-have and custom skill bump
     if sum_of_weights > 0:
         total_score /= sum_of_weights
 
