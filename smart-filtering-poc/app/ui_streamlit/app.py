@@ -209,7 +209,7 @@ with st.sidebar:
     show_only_pass = st.toggle("Mostrar solo candidatos que pasan KO", value=False)
 
     st.divider()
-    st.subheader("Ponderar skills (opcional)")
+    st.subheader("Ponderar skills/experiencia (opcional)")
     skill_alignment_weight = st.slider(
         "Peso adicional del bloque de skills (0 = sin efecto, 1 = máximo)",
         min_value=0.0,
@@ -237,9 +237,21 @@ with st.sidebar:
             key=f"skill_{skill}",
         )
 
+    exp_weight_boost = st.slider(
+        "Peso extra de experiencia (1 = usa el JD tal cual)",
+        min_value=0.5,
+        max_value=2.0,
+        value=1.0,
+        step=0.1,
+    )
+
     st.divider()
     st.caption("Export")
 
+
+# Ajusta pesos de experiencia según slider
+selected_jd_eval["weights"] = dict(selected_jd_eval.get("weights", {}))
+selected_jd_eval["weights"]["experience"] = selected_jd_eval["weights"].get("experience", 0.0) * exp_weight_boost
 
 # Process CVs
 scored_cvs: List[Dict[str, Any]] = []
