@@ -18,6 +18,8 @@ from smart_filtering.assessor.grade import calculate_assessment_score
 from smart_filtering.assessor.questions import get_assessment_questions
 from smart_filtering.explainer.explain import generate_explanation
 from smart_filtering.normalizer.skills_taxonomy import get_canonical_skill
+from smart_filtering.generator.run_generation import create_cvs_as_docx
+from smart_filtering.generator.run_jd_generation import create_jds_as_docx, JD_ROLES
 from smart_filtering.parser.docx_parser import parse_docx_cv, parse_docx_jd
 from smart_filtering.ranker.score import calculate_score
 
@@ -60,29 +62,32 @@ st.markdown(
 def load_data(jd_dir: str, cv_dir: str):
     """Loads JDs and CVs from specified directories."""
     jds = []
-    if os.path.exists(jd_dir):
-        for filename in os.listdir(jd_dir):
-            if filename.endswith(".docx") and not filename.startswith("~"):
-                file_path = os.path.join(jd_dir, filename)
-                jd_data = parse_docx_jd(file_path)
-                if jd_data and jd_data.get("id"):
-                    jds.append(jd_data)
-    else:
-        st.error(f"JD directory not found: {jd_dir}")
+    if not os.path.exists(jd_dir) or not any(f.endswith(".docx") for f in os.listdir(jd_dir) if not f.startswith("~")):
+        # Autogenera JDs si no existen (útil en despliegues cloud/limpios)
+        os.makedirs(jd_dir, exist_ok=True)
+        create_jds_as_docx(jd_dir, JD_ROLES)
+
+    for filename in os.listdir(jd_dir):
+        if filename.endswith(".docx") and not filename.startswith("~"):
+            file_path = os.path.join(jd_dir, filename)
+            jd_data = parse_docx_jd(file_path)
+            if jd_data and jd_data.get("id"):
+                jds.append(jd_data)
 
     if not jds:
         st.warning("No JDs found. Por favor ejecuta el script de generación de JD.")
 
     cvs = []
-    if os.path.exists(cv_dir):
-        for filename in os.listdir(cv_dir):
-            if filename.endswith(".docx") and not filename.startswith("~"):
-                file_path = os.path.join(cv_dir, filename)
-                cv_data = parse_docx_cv(file_path)
-                if cv_data and cv_data.get("id"):
-                    cvs.append(cv_data)
-    else:
-        st.error(f"CV directory not found: {cv_dir}")
+    if not os.path.exists(cv_dir) or not any(f.endswith(".docx") for f in os.listdir(cv_dir) if not f.startswith("~")):
+        os.makedirs(cv_dir, exist_ok=True)
+        create_cvs_as_docx(cv_dir, num_cvs=15)
+
+    for filename in os.listdir(cv_dir):
+        if filename.endswith(".docx") and not filename.startswith("~"):
+            file_path = os.path.join(cv_dir, filename)
+            cv_data = parse_docx_cv(file_path)
+            if cv_data and cv_data.get("id"):
+                cvs.append(cv_data)
 
     if not cvs:
         st.warning("No CVs found. Por favor ejecuta el script de generación de CV.")
