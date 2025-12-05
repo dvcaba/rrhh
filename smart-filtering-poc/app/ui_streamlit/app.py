@@ -198,19 +198,30 @@ with st.sidebar:
     show_only_pass = st.toggle("Mostrar solo candidatos que pasan KO", value=False)
 
     st.divider()
-    st.subheader("Ponderar skills")
+    st.subheader("Ponderar skills (opcional)")
     skill_alignment_weight = st.slider(
-        "Peso adicional bloque skills",
+        "Peso adicional del bloque de skills (0 = sin efecto, 1 = máximo)",
         min_value=0.0,
-        max_value=0.6,
-        value=default_skill_weight_strength,
+        max_value=1.0,
+        value=min(1.0, default_skill_weight_strength),
         step=0.05,
     )
+    available_skills = list(dict.fromkeys(selected_jd.get("must_have", []) + selected_jd.get("nice_to_have", [])))
+    default_selected = selected_jd.get("must_have", [])
+    selected_skills = st.multiselect(
+        "Selecciona las skills que quieres ponderar",
+        options=available_skills,
+        default=default_selected,
+    )
     user_skill_weights: Dict[str, float] = {}
-    for skill in selected_jd.get("must_have", []) + selected_jd.get("nice_to_have", []):
-        base = 5.0 if skill in selected_jd.get("must_have", []) else 3.0
+    for skill in selected_skills:
         user_skill_weights[get_canonical_skill(skill)] = st.slider(
-            f"Peso {skill}", min_value=0.0, max_value=5.0, value=base, step=0.5, key=f"skill_{skill}"
+            f"Importancia de {skill}",
+            min_value=0.0,
+            max_value=10.0,
+            value=8.0 if skill in default_selected else 5.0,
+            step=1.0,
+            key=f"skill_{skill}",
         )
 
     st.divider()
