@@ -235,11 +235,11 @@ with st.sidebar:
             value=8.0 if skill in default_selected else 5.0,
             step=1.0,
             key=f"skill_{skill}",
-        )
+    )
 
     exp_weight_boost = st.slider(
         "Peso extra de experiencia (1 = usa el JD tal cual)",
-        min_value=0.5,
+        min_value=0.0,
         max_value=2.0,
         value=1.0,
         step=0.1,
