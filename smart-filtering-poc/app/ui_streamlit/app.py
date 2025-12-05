@@ -3,6 +3,7 @@
 import os
 import sys
 from pathlib import Path
+import copy
 from typing import Any, Dict, List
 
 import pandas as pd
@@ -184,13 +185,23 @@ with st.sidebar:
     st.header("JD & filtros")
     jd_options = {jd["role"]: jd for jd in all_jds}
     selected_jd_role = st.selectbox("Rol", options=list(jd_options.keys()))
-    selected_jd = jd_options[selected_jd_role]
+    selected_jd_base = jd_options[selected_jd_role]
+    selected_jd_eval = copy.deepcopy(selected_jd_base)
 
     st.caption("Must-have skills")
-    for skill in selected_jd["must_have"]:
+    for skill in selected_jd_base["must_have"]:
         st.markdown(f"<span class='pill'>{skill}</span>", unsafe_allow_html=True)
-    st.write(f"Min años exp: **{selected_jd['min_total_years']}**")
-    loc_policy = selected_jd.get("location_policy", {})
+    min_years_override = st.slider(
+        "Min años de experiencia (override)",
+        min_value=0,
+        max_value=20,
+        value=int(selected_jd_base.get("min_total_years", 0)),
+        step=1,
+    )
+    selected_jd_eval["min_total_years"] = min_years_override
+
+    st.write(f"Min años exp usando: **{selected_jd_eval['min_total_years']}**")
+    loc_policy = selected_jd_eval.get("location_policy", {})
     st.write(
         f"Ubicación: **{loc_policy.get('type', 'N/A')}** en {loc_policy.get('city', 'N/A')} (max {loc_policy.get('max_km', 0)} km)"
     )
@@ -206,8 +217,10 @@ with st.sidebar:
         value=min(1.0, default_skill_weight_strength),
         step=0.05,
     )
-    available_skills = list(dict.fromkeys(selected_jd.get("must_have", []) + selected_jd.get("nice_to_have", [])))
-    default_selected = selected_jd.get("must_have", [])
+    available_skills = list(
+        dict.fromkeys(selected_jd_eval.get("must_have", []) + selected_jd_eval.get("nice_to_have", []))
+    )
+    default_selected = selected_jd_eval.get("must_have", [])
     selected_skills = st.multiselect(
         "Selecciona las skills que quieres ponderar",
         options=available_skills,
@@ -233,7 +246,7 @@ scored_cvs: List[Dict[str, Any]] = []
 for cv in all_cvs:
     score_result = calculate_score(
         cv,
-        selected_jd,
+        selected_jd_eval,
         skill_weights=user_skill_weights,
         skill_weight_strength=skill_alignment_weight,
     )
@@ -242,7 +255,7 @@ for cv in all_cvs:
             "cv_id": cv["id"],
             "name": cv["name"],
             "score": score_result["score"],
-            "ko_reason": None if score_result["score"] > 0 else score_result.get("reason", ""),
+            "ko_reason": "" if score_result["score"] > 0 else score_result.get("reason", ""),
             "experience_years_total": cv.get("experience_years_total", 0),
             "location_city": cv.get("location", {}).get("city", ""),
             "distance_km": score_result["features"].get("distance_to_jd_city_km"),
@@ -261,7 +274,7 @@ ranked_cvs = sorted(filtered_cvs, key=lambda x: x["score"], reverse=True)
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.subheader(f"Candidatos para {selected_jd['role']}")
+    st.subheader(f"Candidatos para {selected_jd_eval['role']}")
     if not ranked_cvs:
         st.warning("No hay candidatos que cumplan los knock-outs. Quita filtros o revisa las must-have.")
     else:
@@ -297,7 +310,7 @@ with col1:
 with col2:
     if ranked_cvs:
         st.subheader("Explicación del ranking")
-        explanation = generate_explanation(selected_cv, selected_jd, selected_candidate_data["score_details"])
+        explanation = generate_explanation(selected_cv, selected_jd_eval, selected_candidate_data["score_details"])
         st.markdown(explanation)
         st.caption("Componentes de score")
         render_score_components(selected_candidate_data["score_details"])
