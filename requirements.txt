@@ -1,1 +1,1 @@
--r smart-filtering-poc/requirements.txt
+-e ./smart-filtering-poc
