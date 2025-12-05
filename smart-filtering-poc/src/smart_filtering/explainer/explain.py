@@ -20,12 +20,12 @@ def generate_explanation(cv: Dict[str, Any], jd: Dict[str, Any], score_result: D
 
     # --- Knock-out Reasons ---
     if score_result['score'] == 0.0:
-        if features["meets_must_have_skills"] == 0:
+        if features.get("meets_must_have_skills") == 0:
             missing_skills = [s for s in jd["must_have"] if get_canonical_skill(s) not in cv["skills"]]
             explanation_parts.append(f"❌ **Rechazo por Habilidades Obligatorias:** Faltan habilidades clave como: {', '.join(missing_skills)}.")
-        if features["meets_min_total_years"] == 0:
-            explanation_parts.append(f"❌ **Rechazo por Experiencia:** El candidato tiene {features['total_experience_years']} años de experiencia total, pero se requieren al menos {features['jd_min_total_years']} años.")
-        if features["meets_min_skill_years"] == 0:
+        if features.get("meets_min_total_years") == 0:
+            explanation_parts.append(f"❌ **Rechazo por Experiencia:** El candidato tiene {features.get('total_experience_years', 0)} años de experiencia total, pero se requieren al menos {features.get('jd_min_total_years', 0)} años.")
+        if features.get("meets_min_skill_years") == 0:
             missing_skill_exp = []
             for skill, min_years in jd["min_skill_years"].items():
                 canonical_skill = get_canonical_skill(skill)
@@ -35,8 +35,8 @@ def generate_explanation(cv: Dict[str, Any], jd: Dict[str, Any], score_result: D
                     missing_skill_exp.append(f"{skill} (mín. {min_years} años)")
             if missing_skill_exp:
                 explanation_parts.append(f"❌ **Rechazo por Experiencia Específica:** No cumple con la experiencia mínima requerida en: {', '.join(missing_skill_exp)}.")
-        if features["location_match_score"] == 0.0 and jd["location_policy"]["type"] != "remote":
-            explanation_parts.append(f"❌ **Rechazo por Ubicación:** El puesto es '{jd['location_policy']['type']}' en {jd['location_policy']['city']} (máx. {jd['location_policy'].get('max_km', 0)} km), y el candidato reside en {cv['location']['city']}.")
+        if features.get("location_match_score", 0.0) == 0.0 and jd.get("location_policy", {}).get("type") != "remote":
+            explanation_parts.append(f"❌ **Rechazo por Ubicación:** El puesto es '{jd.get('location_policy', {}).get('type')}' en {jd.get('location_policy', {}).get('city')} (máx. {jd.get('location_policy', {}).get('max_km', 0)} km), y el candidato reside en {cv.get('location', {}).get('city')}.")
         return "\n".join(explanation_parts)
 
     # --- Positive Matches and Gaps ---

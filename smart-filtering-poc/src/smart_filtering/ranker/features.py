@@ -108,6 +108,7 @@ def extract_features(cv: Dict[str, Any], jd: Dict[str, Any]) -> Dict[str, Any]:
         1 for s in jd.get("must_have", []) if get_canonical_skill(s) in cv["skills"]
     )
     features["must_have_coverage"] = must_matches / must_total if must_total else 1.0
+    features["meets_must_have_skills"] = 1 if features["must_have_coverage"] >= 1.0 else 0
 
     min_skill_total = len(jd.get("min_skill_years", {}))
     min_skill_matches = sum(

@@ -22,6 +22,32 @@ def calculate_score(
     """
     features = extract_features(cv, jd)
 
+    # --- Knock-out rules (hard filters) ---
+    ko_reasons = []
+    if features.get("meets_must_have_skills") == 0:
+        missing = [s for s in jd.get("must_have", []) if get_canonical_skill(s) not in cv.get("skills", {})]
+        if missing:
+            ko_reasons.append(f"Faltan must-have: {', '.join(missing)}")
+        else:
+            ko_reasons.append("No cumple habilidades must-have")
+
+    if features.get("meets_min_total_years") == 0:
+        ko_reasons.append(f"Experiencia total insuficiente ({features.get('total_experience_years', 0)} vs {jd.get('min_total_years', 0)})")
+
+    if features.get("meets_min_skill_years") == 0:
+        ko_reasons.append("No cumple mínima experiencia por skill")
+
+    if features.get("location_match_score", 0.0) == 0.0 and jd.get("location_policy", {}).get("type") != "remote":
+        ko_reasons.append("Ubicación fuera de rango para un puesto no remoto")
+
+    if ko_reasons:
+        return {
+            "score": 0.0,
+            "reason": "; ".join(ko_reasons),
+            "features": features,
+            "score_components": {},
+        }
+
     # --- Calculate Weighted Score ---
     weights = jd["weights"]
     
