@@ -126,7 +126,13 @@ def generate_cv(target_role: str = "Generic", relevance_hint: int = 0) -> Dict[s
     cv_id = generate_cv_id()
     name = random.choice(NAMES)
     location = random.choice(CITIES)
-    total_years = round(random.uniform(0.5, 12), 1)
+    # Ajusta rango de experiencia por relevancia para dar candidatos que cumplan JD
+    if relevance_hint >= 2:
+        total_years = round(random.uniform(5, 12), 1)
+    elif relevance_hint >= 1:
+        total_years = round(random.uniform(3, 9), 1)
+    else:
+        total_years = round(random.uniform(0.5, 4), 1)
 
     # Determine primary role based on target_role or randomly
     primary_role = target_role if target_role != "Generic" else random.choice(list(CORE_SKILLS_BY_ROLE.keys()) + ["Generic"])
@@ -140,6 +146,16 @@ def generate_cv(target_role: str = "Generic", relevance_hint: int = 0) -> Dict[s
     for exp in experiences:
         for skill in exp["skills"]:
             all_skills[get_canonical_skill(skill)] = get_skill_level(primary_role)
+
+    # Garantiza must-have por rol cuando relevancia es media/alta
+    MUST_HAVE_BY_ROLE = {
+        "Data Engineer": ["python", "pyspark", "sql"],
+        "Project Manager": ["stakeholder_management", "planning", "jira", "agile"],
+        "QA Automation Engineer": ["qa_automation", "python", "git"],
+    }
+    if relevance_hint >= 1:
+        for skill in MUST_HAVE_BY_ROLE.get(primary_role, []):
+            all_skills[get_canonical_skill(skill)] = "advanced" if relevance_hint >= 2 else "intermediate"
     
     # Add some extra skills based on role and total years
     if primary_role == "Data Engineer" and total_years > 4:
