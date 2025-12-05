@@ -7,25 +7,27 @@ This project aims to demonstrate a smart candidate filtering and assessment syst
 ```
 smart-filtering-poc/
   app/
-    ui_streamlit/           # UI Streamlit (lector de CV/JD ya parseados)
+    ui_streamlit/           # UI Streamlit: ranking, filtros, explicación y export CSV
   data/
     raw/
-      cvs/                  # CVs .docx generados
-      jds/                  # JDs .docx generados
-    processed/
-    outputs/
+      cvs/                  # CVs .docx generados por run_generation.py
+      jds/                  # JDs .docx generados por run_jd_generation.py
+    processed/              # Espacio para datos intermedios (ignorado en git)
+    outputs/                # Shortlists u otros exports (ignorado en git)
   src/
     smart_filtering/
-      generator/
-      normalizer/
-      embedder/
-      ranker/
-      explainer/
-      assessor/
-      parser/
-  tests/
-  PLAN.md
-  README.md
+      generator/            # Creación de CVs/JDs sintéticos y scripts DOCX
+      normalizer/           # Taxonomía de skills y helpers de canonicalización
+      embedder/             # Wrapper de SentenceTransformer (modo offline disponible)
+      ranker/               # Features y scoring (pesos, cobertura, ubicación)
+      explainer/            # Texto explicativo/KO del score
+      assessor/             # Banco de preguntas y grader simple para mini-assessment
+      parser/               # Parsers DOCX → dict para CV/JD
+    cli.py                  # CLI generate-cv/generate-jd/rank
+    __main__.py             # Permite `python -m smart_filtering`
+  tests/                    # Tests básicos de parser y scoring
+  PLAN.md                   # Plan de implementación
+  README.md                 # Este archivo (guía de uso)
 ```
 
 Consulta `PLAN.md` para el plan de implementación detallado.
