@@ -255,7 +255,7 @@ for cv in all_cvs:
             "cv_id": cv["id"],
             "name": cv["name"],
             "score": score_result["score"],
-            "ko_reason": "" if score_result["score"] > 0 else score_result.get("reason", ""),
+            "ko_reason": "OK" if score_result["score"] > 0 else (score_result.get("reason") or "KO sin motivo"),
             "experience_years_total": cv.get("experience_years_total", 0),
             "location_city": cv.get("location", {}).get("city", ""),
             "distance_km": score_result["features"].get("distance_to_jd_city_km"),
