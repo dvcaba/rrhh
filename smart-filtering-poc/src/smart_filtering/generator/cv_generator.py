@@ -175,6 +175,22 @@ def generate_cv(target_role: str = "Generic", relevance_hint: int = 0) -> Dict[s
         "embeddings": {"skills_vec": [], "profile_vec": []}, # Placeholder
         "relevance_hint": relevance_hint # For ground truth generation
     }
+
+    # Inject lower-quality profiles for low relevance to garantizar KOs en tests/ranking
+    if relevance_hint <= 0:
+        # Recorta experiencia total para aumentar probabilidad de KO por años
+        cv["experience_years_total"] = round(random.uniform(0.5, 2.5), 1)
+
+        # Quita algunas skills core del rol para forzar fallos de must-have
+        core = CORE_SKILLS_BY_ROLE.get(primary_role, {})
+        skills_to_remove = []
+        for skills in core.values():
+            if skills:
+                skills_to_remove.append(random.choice(skills))
+        for skill in skills_to_remove:
+            canonical = get_canonical_skill(skill)
+            cv["skills"].pop(canonical, None)
+
     return cv
 
 if __name__ == "__main__":
