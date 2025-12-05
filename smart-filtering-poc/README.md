@@ -77,3 +77,23 @@ pytest
 - **Features y scoring**: `ranker/features.py` calcula similitudes semánticas, coberturas de must-have y distancia geográfica; `ranker/score.py` pondera todo según el JD, aplica factores de cobertura y un peso opcional de “skill alignment” definido por el usuario.
 - **Explicaciones y assessment**: `explainer/explain.py` genera texto en castellano con razones de score/KO. `assessor/questions.py` y `assessor/grade.py` simulan un mini-assessment muy básico por keywords.
 - **UI**: `app/ui_streamlit/app.py` permite elegir JD, ajustar pesos de skills, filtrar KOs, ver ranking con `cv_id`, detalle de CV, explicación y exportar CSV.
+
+## Flujo de datos (resumen)
+
+```
+[Generación] run_generation.py / run_jd_generation.py
+    -> CVs/JDs .docx en data/raw
+[Parsing] parser/docx_parser.py
+    -> dicts cv/jd normalizados (coords incluidas si la ciudad es conocida)
+[Embeddings] embedder/embed.py (modelo ST o modo offline)
+[Features] ranker/features.py (skills/title similarity, experiencia, ubicación, cobertura)
+[Score] ranker/score.py (ponderación JD + skill_alignment)
+[Explicación/Assessment] explainer/explain.py, assessor/*
+[Presentación/Export] UI Streamlit (app/ui_streamlit/app.py) y CLI `smart-filtering rank`
+```
+
+## Embedder
+
+- Modelo por defecto: `paraphrase-multilingual-MiniLM-L12-v2` (SentenceTransformer). Se carga una vez y se cachea.
+- Modo offline: `SMART_FILTERING_EMBEDDER_MODE=offline` fuerza vectores cero para evitar descargas (válido para smoke tests y despliegues sin red).
+- Si usas embeddings reales, asegúrate de tener red y suficiente memoria; el modelo se descarga la primera vez.
