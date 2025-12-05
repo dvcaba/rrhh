@@ -179,15 +179,16 @@ def generate_cv(target_role: str = "Generic", relevance_hint: int = 0) -> Dict[s
     # Inject lower-quality profiles for low relevance to garantizar KOs en tests/ranking
     if relevance_hint <= 0:
         # Recorta experiencia total para aumentar probabilidad de KO por años
-        cv["experience_years_total"] = round(random.uniform(0.5, 2.5), 1)
+        cv["experience_years_total"] = round(random.uniform(0.2, 1.5), 1)
 
-        # Quita algunas skills core del rol para forzar fallos de must-have
-        core = CORE_SKILLS_BY_ROLE.get(primary_role, {})
-        skills_to_remove = []
-        for skills in core.values():
-            if skills:
-                skills_to_remove.append(random.choice(skills))
-        for skill in skills_to_remove:
+        # Quita sistemáticamente las must-have típicas del rol para forzar KO
+        MUST_HAVE_BY_ROLE = {
+            "Data Engineer": ["python", "pyspark", "sql"],
+            "Project Manager": ["stakeholder_management", "planning", "jira", "agile"],
+            "QA Automation Engineer": ["qa_automation", "python", "git"],
+        }
+        remove_list = MUST_HAVE_BY_ROLE.get(primary_role, [])
+        for skill in remove_list:
             canonical = get_canonical_skill(skill)
             cv["skills"].pop(canonical, None)
 
